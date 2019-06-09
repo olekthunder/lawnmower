@@ -1,8 +1,12 @@
 import pygame
 import colors
-from lawnmower import LanwMower
+from lawnmower import get_lawn_mower
+from grass import init_grass_array
 
-DISPLAY_WIDTH, DISPLAY_HEIGHT = 800, 600
+DISPLAY_WIDTH, DISPLAY_HEIGHT = 1024, 600
+Y_OFFSET = 512
+SPEED = 8  # 8px per move
+FPS = 60
 
 
 def init_screen(width, height):
@@ -11,48 +15,42 @@ def init_screen(width, height):
     return pygame.display.set_mode((width, height))
 
 
+def repaint_bg(screen):
+    sky_rectangle = pygame.Rect(0, 0, DISPLAY_WIDTH, Y_OFFSET)
+    ground_rectangle = pygame.Rect(
+        0, Y_OFFSET, DISPLAY_WIDTH, DISPLAY_HEIGHT - Y_OFFSET
+    )
+    screen.fill(colors.BLACK, rect=sky_rectangle)
+    screen.fill(colors.BROWN, rect=ground_rectangle)
+
+
 def loop():
     screen = init_screen(DISPLAY_WIDTH, DISPLAY_HEIGHT)
-    lawnmower = LanwMower()
-
-    # Temp shit
-    x = 100
-    y = 300
-    x_change = 0
-    y_change = 0
+    clock = pygame.time.Clock()
+    lawnmower = get_lawn_mower(screen, speed=8, x=64, y=Y_OFFSET)
+    all_sprites = pygame.sprite.Group()
+    grass_array = init_grass_array(screen, offset_x=256, offset_y=Y_OFFSET)
+    all_sprites.add(lawnmower, *grass_array)
 
     # Game loop
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    x_change = -5
-                if event.key == pygame.K_RIGHT:
-                    x_change = 5
-                if event.key == pygame.K_UP:
-                    y_change = -5
-                if event.key == pygame.K_DOWN:
-                    y_change = 5
-            if event.type == pygame.KEYUP:
-                if event.key in (pygame.K_LEFT, pygame.K_RIGHT):
-                    x_change = 0
-                if event.key in (pygame.K_UP, pygame.K_DOWN):
-                    y_change = 0
-            print(x, y)
+        dt = clock.tick(FPS) / 1000
 
-            future_x = x + x_change
-            future_y = y + y_change
-            if future_x < DISPLAY_WIDTH - lawnmower.width and future_x > 0:
-                x = future_x
-            if future_y < DISPLAY_HEIGHT - lawnmower.height and future_y > 0:
-                y = future_y
-            screen.fill(colors.WHITE)
-            lawnmower.show(screen, x, y)
+        # Events
+        event = pygame.event.poll()
+        if event.type == pygame.QUIT:
+            return
+        lawnmower.dispatch_event(event)
 
-            pygame.display.update()
-    return
+        # Render
+        repaint_bg(screen)
+        for grass in grass_array:
+            grass.render()
+        lawnmower.render()
+
+        # Update
+        all_sprites.update(dt)
+        pygame.display.update()
 
 
 if __name__ == "__main__":
