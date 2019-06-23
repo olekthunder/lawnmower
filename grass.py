@@ -4,19 +4,18 @@ from sprite_base import SpriteBase
 
 class Grass(SpriteBase):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.image = sprites.GRASS
+        super().__init__(*args, image=sprites.GRASS, **kwargs)
 
 
-def init_grass_array(screen, offset_x, offset_y, grass_sprite_size=64):
+def init_grass_array(screen, x, y, grass_sprite_size=64):
     screen_width = screen.get_width()
     return [
         Grass(
             screen=screen,
             x=x,
-            y=offset_y,
+            y=y,
             width=grass_sprite_size,
             height=grass_sprite_size,
         )
-        for x in range(offset_x, screen_width, grass_sprite_size)
+        for x in range(x, screen_width, grass_sprite_size)
     ]

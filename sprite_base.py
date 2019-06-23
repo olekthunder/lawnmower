@@ -1,7 +1,9 @@
 import pygame
+import colors
 
 
 class SpriteBase(pygame.sprite.Sprite):
+    image = pygame.Surface([80, 80]).fill(colors.WHITE)
     def __init__(
         self,
         screen,
@@ -11,29 +13,43 @@ class SpriteBase(pygame.sprite.Sprite):
         width=0,
         height=0,
         speed=0,
-        left_offset=0,
-        right_offset=0,
-        top_offset=0,
-        bottom_offset=0,
         *args,
         **kwargs
     ):
         super().__init__(*args, **kwargs)
+        self.image = image or self.image
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y - self.height
         self.screen = screen
-        self.left_offset = left_offset
-        self.right_offset = right_offset
-        self.top_offset = top_offset
-        self.bottom_offset = bottom_offset
         self.speed = speed
-        self.width = width
-        self.height = height
         self.image_idx = 0
-        self.image = None
-        self.x = x - self.left_offset
-        self.y = y - (self.bottom_offset + self.top_offset)
+
+    @property
+    def width(self):
+        return self.rect.width
+
+    @property
+    def height(self):
+        return self.rect.height
+
+    @property
+    def x(self):
+        return self.rect.x
+
+    @x.setter
+    def x(self, new_x):
+        self.rect.x = new_x
+
+    @property
+    def y(self):
+        return self.rect.y
+
+    @y.setter
+    def y(self, new_y):
+        self.rect.y = new_y
 
     def render(self):
-        print(self.image, self.x, self.y)
         self.screen.blit(self.image, (self.x, self.y))
 
     def move(self, x_change=0, y_change=0):
@@ -48,10 +64,10 @@ class SpriteBase(pygame.sprite.Sprite):
     def will_limits_be_exceeded(self, new_x, new_y):
         display_width, display_height = self.screen.get_size()
         return (
-            new_x > display_width - self.width + self.right_offset
-            or new_x < 0 - self.left_offset
-            or new_y > display_height - self.height + self.top_offset
-            or new_y < 0 - self.bottom_offset
+            new_x > display_width - self.width
+            or new_x < 0
+            or new_y > display_height - self.height
+            or new_y < 0
         )
 
     def on_limits_exceeded_callback(self):

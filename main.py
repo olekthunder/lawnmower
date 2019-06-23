@@ -27,9 +27,9 @@ def repaint_bg(screen):
 def loop():
     screen = init_screen(DISPLAY_WIDTH, DISPLAY_HEIGHT)
     clock = pygame.time.Clock()
-    lawnmower = get_lawn_mower(screen, speed=8, x=64, y=Y_OFFSET)
+    lawnmower = get_lawn_mower(screen, speed=8, x=64, y=Y_OFFSET + 48)
     all_sprites = pygame.sprite.Group()
-    grass_array = init_grass_array(screen, offset_x=256, offset_y=Y_OFFSET)
+    grass_array = init_grass_array(screen, x=64, y=Y_OFFSET + 48)
     all_sprites.add(lawnmower, *grass_array)
 
     # Game loop
@@ -44,8 +44,12 @@ def loop():
 
         # Render
         repaint_bg(screen)
-        for grass in grass_array:
-            grass.render()
+        for i, grass in enumerate(grass_array.copy()):
+            if lawnmower.working and grass.rect.colliderect(lawnmower.rect):
+                grass.kill()
+                del grass_array[0]
+            else:
+                grass.render()
         lawnmower.render()
 
         # Update
