@@ -4,17 +4,9 @@ import colors
 
 class SpriteBase(pygame.sprite.Sprite):
     image = pygame.Surface([80, 80]).fill(colors.WHITE)
+
     def __init__(
-        self,
-        screen,
-        image=None,
-        x=0,
-        y=0,
-        width=0,
-        height=0,
-        speed=0,
-        *args,
-        **kwargs
+        self, screen, image=None, x=0, y=0, width=0, height=0, *args, **kwargs
     ):
         super().__init__(*args, **kwargs)
         self.image = image or self.image
@@ -22,7 +14,6 @@ class SpriteBase(pygame.sprite.Sprite):
         self.x = x
         self.y = y - self.height
         self.screen = screen
-        self.speed = speed
         self.image_idx = 0
 
     @property
@@ -74,7 +65,7 @@ class SpriteBase(pygame.sprite.Sprite):
         pass
 
     def update(self, *args):
-        pass
+        self.render()
 
     def next_image(self, *args, **kwargs):
         pass
