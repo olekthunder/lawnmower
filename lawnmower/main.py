@@ -1,7 +1,7 @@
 import pygame
-import colors
-from lawnmower import get_lawn_mower
-from grass import init_grass_array
+from . import colors
+from .lawnmower import get_lawn_mower
+from .grass import init_grass_array
 
 pygame.init()
 
@@ -89,9 +89,13 @@ def loop():
         pygame.display.update()
 
 
-if __name__ == "__main__":
+def run():
     loop()  # Wait for it...
 
     # Quit
     pygame.quit()
     quit()
+
+
+if __name__ == "__main__":
+    run()

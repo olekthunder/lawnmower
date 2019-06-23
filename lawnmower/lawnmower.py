@@ -1,9 +1,9 @@
 import enum
-import sprites
+from . import sprites
 import pygame
 
-from fuel_bar import FuelBar
-from sprite_base import SpriteBase
+from .fuel_bar import FuelBar
+from .sprite_base import SpriteBase
 
 LAWNMOWER_IMAGES = (sprites.LAWNMOVER_DEFAULT, sprites.LAWNMOVER_WORKING)
 

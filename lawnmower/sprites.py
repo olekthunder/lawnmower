@@ -3,7 +3,8 @@ import pygame
 
 SPRITE_WIDTH = 256
 SPRITE_HEIGHT = 256
-SPRITES_DIR = "sprite_images"
+
+SPRITES_DIR = os.path.join(os.path.dirname(__file__), "sprite_images")
 
 LAWNMOVER_DEFAULT_SPRITE_PATH = os.path.join(SPRITES_DIR, "lawnmower-default.png")
 LAWNMOVER_DEFAULT = pygame.image.load(LAWNMOVER_DEFAULT_SPRITE_PATH)

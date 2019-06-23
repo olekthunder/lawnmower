@@ -1,5 +1,5 @@
 import pygame
-import colors
+from . import colors
 
 
 class SpriteBase(pygame.sprite.Sprite):

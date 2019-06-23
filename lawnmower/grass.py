@@ -1,5 +1,5 @@
-import sprites
-from sprite_base import SpriteBase
+from . import sprites
+from .sprite_base import SpriteBase
 
 
 class Grass(SpriteBase):

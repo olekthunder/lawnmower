@@ -1,8 +1,8 @@
 import pygame
-import colors
+from . import colors
 
 from copy import copy
-from sprite_base import SpriteBase
+from .sprite_base import SpriteBase
 
 
 class FuelBar(SpriteBase):
