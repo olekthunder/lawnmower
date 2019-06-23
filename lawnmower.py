@@ -8,7 +8,7 @@ from sprite_base import SpriteBase
 LAWNMOWER_IMAGES = (sprites.LAWNMOVER_DEFAULT, sprites.LAWNMOVER_WORKING)
 
 
-class LanwMower(SpriteBase):
+class LawnMower(SpriteBase):
     def __init__(self, *args, speed=0, **kwargs):
         super().__init__(*args, **kwargs, image=LAWNMOWER_IMAGES[0])
         self._speed = speed
@@ -83,4 +83,4 @@ class LanwMower(SpriteBase):
 
 
 def get_lawn_mower(screen, *args, **kwargs):
-    return LanwMower(screen=screen, **kwargs)
+    return LawnMower(screen=screen, **kwargs)
