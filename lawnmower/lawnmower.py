@@ -32,7 +32,6 @@ class LawnMower(AnimatedSprite):
         return self.engine.fuel_consumption
 
     def turn_on(self):
-        print(self.fuel_tank.fuel_left)
         if self.fuel_tank.empty:
             self.engine.turn_on()
 

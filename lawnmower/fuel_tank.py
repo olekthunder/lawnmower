@@ -1,5 +1,3 @@
-from copy import copy
-
 import pygame
 
 from . import colors
