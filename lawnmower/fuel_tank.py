@@ -44,7 +44,7 @@ class FuelBar(SpriteBase):
         return pygame.draw.rect(self.image, colors.RED, rect)
 
     def refill(self):
-        self.percentage = 100
+        self._percentage = 100
 
 
 class FuelTank(SpriteBase):
