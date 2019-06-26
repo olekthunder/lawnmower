@@ -1,20 +1,19 @@
 import pygame
+
 from . import colors
 
 
 class SpriteBase(pygame.sprite.Sprite):
-    image = pygame.Surface([80, 80]).fill(colors.WHITE)
+    DEFAULT_IMAGE = pygame.Surface([80, 80])
+    DEFAULT_IMAGE.fill(colors.WHITE)
 
-    def __init__(
-        self, screen, image=None, x=0, y=0, width=0, height=0, *args, **kwargs
-    ):
-        super().__init__(*args, **kwargs)
-        self.image = image or self.image
+    def __init__(self, screen, image=None, x=0, y=0):
+        super().__init__()
+        self.image = image or self.DEFAULT_IMAGE
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y - self.height
         self.screen = screen
-        self.image_idx = 0
 
     @property
     def width(self):
@@ -40,17 +39,12 @@ class SpriteBase(pygame.sprite.Sprite):
     def y(self, new_y):
         self.rect.y = new_y
 
-    def render(self):
-        self.screen.blit(self.image, (self.x, self.y))
-
     def move(self, x_change=0, y_change=0):
         new_x = self.x + x_change
         new_y = self.y + y_change
         if not self.will_limits_be_exceeded(new_x, new_y):
             self.x = new_x
             self.y = new_y
-        else:
-            self.on_limits_exceeded_callback()
 
     def will_limits_be_exceeded(self, new_x, new_y):
         display_width, display_height = self.screen.get_size()
@@ -61,14 +55,46 @@ class SpriteBase(pygame.sprite.Sprite):
             or new_y < 0
         )
 
-    def on_limits_exceeded_callback(self):
-        pass
+    def is_collide(self, other):
+        return self.rect.colliderect(other.rect)
 
-    def update(self, *args):
-        self.render()
+    def update(self, *args, **kwargs):
+        """Hook name convention"""
+        self.screen.blit(self.image, (self.x, self.y))
 
-    def next_image(self, *args, **kwargs):
-        pass
 
-    def dispatch_event(self, event):
-        pass
+class AnimatedSprite(SpriteBase):
+    FPS = 60
+
+    def __init__(self, *args, images=None, animation_time=0.1, **kwargs):
+        super().__init__(*args, image=self.image if not images else images[0],
+                         **kwargs)
+        self.image_idx = 0
+        self.images = images or []
+        self.image = self.image if not images else images[self.image_idx]
+        self.animation_time = animation_time
+        self.animation_stopped = False
+        self.clock = pygame.time.Clock()
+        self.last_sprite_time = 0
+
+    def should_switch_sprite(self, now):
+        return self.last_sprite_time > self.animation_time
+
+    def next_sprite(self):
+        self.image_idx = (self.image_idx + 1) % len(self.images)
+        return self.images[self.image_idx]
+
+    def get_time(self):
+        return self.clock.tick(self.FPS) / 1000
+
+    def update(self, *args, **kwargs):
+        super().update(*args)
+        now = self.get_time()
+        self.last_sprite_time += now
+        if self.should_switch_sprite(now=now):
+            self.last_sprite_time = 0
+            self.image = self.next_sprite()
+
+    def stop_animation(self):
+        self.image = self.images[0]
+        self.image_idx = 0

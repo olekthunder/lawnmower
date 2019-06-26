@@ -1,86 +1,76 @@
-import enum
 from . import sprites
-import pygame
-
-from .fuel_bar import FuelBar
-from .sprite_base import SpriteBase
-
-LAWNMOWER_IMAGES = (sprites.LAWNMOVER_DEFAULT, sprites.LAWNMOVER_WORKING)
+from .engine import Engine
+from .fuel_tank import FuelTank
+from .sprite_base import AnimatedSprite
 
 
-class LawnMower(SpriteBase):
-    def __init__(self, *args, speed=0, **kwargs):
-        super().__init__(*args, **kwargs, image=LAWNMOWER_IMAGES[0])
-        self._speed = speed
-        self.speed_change = 8
-        self.max_speed = 32
-        self.last_frame_time = 0
-        self.working = False
-        self.current_time = 0
-        self.animation_time = 0.1
-        self.image_idx = 0
-        self.fuel_consuption = 0.5
-        self.fuel = FuelBar(percentage=50, screen=self.screen)
+class LawnMower(AnimatedSprite):
+    IMAGES = (sprites.LAWNMOVER_DEFAULT, sprites.LAWNMOVER_WORKING)
+    DEFAULT_IMAGE = sprites.LAWNMOVER_DEFAULT
 
-    def run(self):
-        if self.fuel:
-            self.working = True
+    def __init__(self, screen, engine, fuel_tank, *args, **kwargs):
+        super().__init__(screen, *args, images=self.IMAGES, **kwargs)
+        self.screen = screen
+        self.engine = engine
+        self.fuel_tank = fuel_tank
+        self.parts = [engine, fuel_tank]
 
-    def stop(self):
-        self.working = False
-        self.image = LAWNMOWER_IMAGES[0]
-
-    def toggle_working(self):
-        if self.working:
-            self.stop()
-        else:
-            self.run()
+    @property
+    def acceleration(self):
+        return self.engine.acceleration
 
     @property
     def speed(self):
-        return self._speed
+        return self.engine.speed
 
-    @speed.setter
-    def speed(self, new):
-        if abs(new) > self.max_speed:
-            return
-        self._speed = new
+    @property
+    def working(self):
+        return self.engine.working
 
-    def dispatch_event(self, event):
-        x_change = 0
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_DOWN:
-                self.speed = 0
-            if event.key == pygame.K_LEFT:
-                self.speed -= self.speed_change
-            if event.key == pygame.K_RIGHT:
-                self.speed += self.speed_change
-            if event.key == pygame.K_LSHIFT:
-                self.toggle_working()
-            if event.key == pygame.K_r:
-                self.fuel.refill()
-        if event.type == pygame.KEYUP:
-            if event.key in (pygame.K_LEFT, pygame.K_RIGHT):
-                x_change = 0
-        self.move(x_change, 0)
+    @property
+    def fuel_consumption(self):
+        return self.engine.fuel_consumption
 
-    def update(self, dt):
-        self.last_frame_time += dt
-        if self.last_frame_time >= self.animation_time:
-            self.move(self.speed, 0)
-            self.last_frame_time = 0
-            if self.working:
-                self.image_idx = (self.image_idx + 1) % 2
-                self.fuel -= self.fuel_consuption
-                self.image = LAWNMOWER_IMAGES[self.image_idx]
-                if not self.fuel:
-                    self.stop()
-        self.render()
+    def turn_on(self):
+        print(self.fuel_tank.fuel_left)
+        if self.fuel_tank.empty:
+            self.engine.turn_on()
 
-    def render(self):
-        super().render()
-        self.fuel.render_bar()
+    def turn_off(self):
+        self.engine.turn_off()
+        self.stop_animation()
+
+    def stop(self):
+        self.engine.speed = 0
+
+    def increase_speed(self):
+        self.engine.increase_speed()
+
+    def decrease_speed(self):
+        self.engine.decrease_speed()
+
+    def should_switch_sprite(self, *args, **kwargs):
+        return super().should_switch_sprite(*args, **kwargs) and self.working
+
+    def update(self, *args, **kwargs):
+        super().update(*args, **kwargs)
+        if self.working:
+            self.fuel_tank.use(self.fuel_consumption)
+        for part in self.parts:
+            part.update(*args, **kwargs)
+        self.move(self.speed, 0)
+
+    def toggle(self):
+        if self.working:
+            self.turn_off()
+        else:
+            self.turn_on()
 
 
 def get_lawn_mower(screen, *args, **kwargs):
-    return LawnMower(screen=screen, **kwargs)
+    return LawnMower(
+        screen,
+        engine=Engine(screen, fuel_consumption=0.1),
+        fuel_tank=FuelTank(screen),
+        *args, **kwargs
+    )

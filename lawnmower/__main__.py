@@ -1,3 +1,5 @@
-from .main import run
+from .game_controller import GameController
 
-run()
+if __name__ == "__main__":
+    game = GameController()
+    game.run()

@@ -1,4 +1,5 @@
 import os
+
 import pygame
 
 SPRITE_WIDTH = 256
